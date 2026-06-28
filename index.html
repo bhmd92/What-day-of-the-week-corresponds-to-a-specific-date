@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة تحديد أيام الأسبوع الكونية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 550px;
+            width: 100%;
+            border: 1px solid #334155;
+        }
+        h2 {
+            text-align: center;
+            color: #38bdf8;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 12px;
+        }
+        .section {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #475569;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #f43f5e;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background-color: #1e293b;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 1rem;
+            text-align: center;
+        }
+        button {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.05rem;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #1e293b;
+            border-right: 4px solid #38bdf8;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 24px;
+        }
+        .error {
+            border-color: #ef4444 !important;
+            border-right: 4px solid #ef4444;
+            color: #f87171;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>حاسبة تحديد يوم الأسبوع التاريخي</h2>
+    
+    <div class="section">
+        <label for="targetDate">الرجاء إدخال التاريخ المراد معرفة يومه:</label>
+        <!-- تحديد الحد الأدنى للتقويم من تاريخ 1500-01-01 -->
+        <input type="date" id="targetDate" min="1500-01-01">
+        
+        <button onclick="findDayOfWeek()">ابحث عن اليوم الموافِق</button>
+        
+        <div class="result" id="calcResult">بانتظار اختيار التاريخ وضغط زر البحث...</div>
+    </div>
+
+    <div class="note">نطاق عمل الحاسبة: من 01 يناير 1500 ميلادية فصاعداً</div>
+</div>
+
+<script>
+    function findDayOfWeek() {
+        const inputElement = document.getElementById('targetDate');
+        const resultElement = document.getElementById('calcResult');
+        
+        // التحقق من وجود إدخال
+        if (!inputElement.value) {
+            resultElement.className = "result error";
+            resultElement.innerHTML = "⚠️ خطأ: يرجى اختيار تاريخ صالح أولاً.";
+            return;
+        }
+
+        const selectedDate = new Date(inputElement.value);
+        // حد الأمان الأدنى (1 يناير 1500)
+        const limitDate = new Date(1500, 0, 1); 
+
+        // جدار الحماية التاريخي لمنع ما قبل عام 1500
+        if (selectedDate < limitDate) {
+            resultElement.className = "result error";
+            resultElement.innerHTML = "⚠️ خطأ: الحساب مستحيل وغير ممكن! التاريخ المدخل يقع قبل الحد المسموح به للآلة (01 يناير 1500 ميلادية).";
+            return;
+        }
+
+        // مصفوفة أيام الأسبوع باللغة العربية كالمطلوب تماماً
+        const daysOfWeekArabic = [
+            "الأحد",
+            "الإثنين",
+            "الثلاثاء",
+            "الأربعاء",
+            "الخميس",
+            "الجمعة",
+            "السبت"
+        ];
+
+        // استخراج رقم اليوم (0 للأحد، 1 للإثنين... إلخ)
+        const dayIndex = selectedDate.getDay();
+        const dayNameArabic = daysOfWeekArabic[dayIndex];
+
+        // تنسيق التاريخ المدخل لإظهاره بشكل رسمي للمستخدم
+        const formattedDate = selectedDate.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // عرض النتيجة النهائية بالصياغة الرسمية المتوافقة مع المظهر السابق
+        resultElement.className = "result";
+        resultElement.innerHTML = `التاريخ المدخل: <strong>${formattedDate}</strong> يوافق بدقة يوم: <span style="color: #38bdf8; font-weight: bold;">${dayNameArabic}</span>.`;
+    }
+</script>
+
+</body>
+</html>
