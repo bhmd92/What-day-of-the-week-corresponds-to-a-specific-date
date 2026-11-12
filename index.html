@@ -1,817 +1,165 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ساعة الباحث محمد بوحميدة</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة تحديد أيام الأسبوع الكونية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 550px;
+            width: 100%;
+            border: 1px solid #334155;
+        }
+        h2 {
+            text-align: center;
+            color: #38bdf8;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 12px;
+        }
+        .section {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #475569;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #f43f5e;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background-color: #1e293b;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 1rem;
+            text-align: center;
+        }
+        button {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.05rem;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #1e293b;
+            border-right: 4px solid #38bdf8;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 24px;
+        }
+        .error {
+            border-color: #ef4444 !important;
+            border-right: 4px solid #ef4444;
+            color: #f87171;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
 
-        <!-- Fonts & Tailwind CSS -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Orbitron:wght@400;600;800;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<div class="container">
+    <h2>حاسبة تحديد يوم الأسبوع التاريخي</h2>
+    
+    <div class="section">
+        <label for="targetDate">الرجاء إدخال التاريخ المراد معرفة يومه:</label>
+        <!-- تحديد الحد الأدنى للتقويم من تاريخ 1500-01-01 -->
+        <input type="date" id="targetDate" min="1500-01-01">
+        
+        <button onclick="findDayOfWeek()">ابحث عن اليوم الموافِق</button>
+        
+        <div class="result" id="calcResult">بانتظار اختيار التاريخ وضغط زر البحث...</div>
+    </div>
 
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            gold: {
-                                300: '#ffe58f',
-                                400: '#ffd666',
-                                500: '#faad14',
-                                600: '#d48806',
-                            },
-                            cyanNeon: '#00f3ff',
-                        },
-                        fontFamily: {
-                            tajawal: ['Tajawal', 'sans-serif'],
-                            orbitron: ['Orbitron', 'sans-serif'],
-                            amiri: ['Amiri', 'serif'],
-                        }
-                    }
-                }
-            }
-        </script>
+    <div class="note">نطاق عمل الحاسبة: من 01 يناير 1500 ميلادية فصاعداً</div>
+</div>
 
-        <style>
-            body {
-                background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-                font-family: 'Tajawal', sans-serif;
-                overflow-x: hidden;
-            }
+<script>
+    function findDayOfWeek() {
+        const inputElement = document.getElementById('targetDate');
+        const resultElement = document.getElementById('calcResult');
+        
+        // التحقق من وجود إدخال
+        if (!inputElement.value) {
+            resultElement.className = "result error";
+            resultElement.innerHTML = "⚠️ خطأ: يرجى اختيار تاريخ صالح أولاً.";
+            return;
+        }
 
-            /* Neon Glow Effects */
-            .neon-cyan-text {
-                text-shadow: 0 0 10px rgba(0, 243, 255, 0.6), 0 0 20px rgba(0, 243, 255, 0.4);
-            }
-            .neon-gold-text {
-                text-shadow: 0 0 10px rgba(250, 173, 20, 0.6), 0 0 20px rgba(250, 173, 20, 0.4);
-            }
-            .glass-panel {
-                background: rgba(15, 23, 42, 0.75);
-                backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 215, 0, 0.15);
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            }
+        const selectedDate = new Date(inputElement.value);
+        // حد الأمان الأدنى (1 يناير 1500)
+        const limitDate = new Date(1500, 0, 1); 
 
-            /* Smooth Clock Hands Transition */
-            .clock-hand {
-                transform-origin: 50% 100%;
-                transition: transform 0.05s cubic-bezier(0.4, 2.08, 0.55, 0.44);
-            }
-        </style>
-    </head>
-    <body class="min-h-screen text-slate-100 flex flex-col justify-between items-center p-4 relative overflow-y-auto">
+        // جدار الحماية التاريخي لمنع ما قبل عام 1500
+        if (selectedDate < limitDate) {
+            resultElement.className = "result error";
+            resultElement.innerHTML = "⚠️ خطأ: الحساب مستحيل وغير ممكن! التاريخ المدخل يقع قبل الحد المسموح به للآلة (01 يناير 1500 ميلادية).";
+            return;
+        }
 
-        <!-- Language Selector Bar -->
-        <div class="z-20 w-full max-w-5xl flex justify-center items-center mb-2">
-            <div class="glass-panel px-3 py-1.5 rounded-2xl flex items-center gap-2 border-gold-500/30">
-                <i class="fa-solid fa-globe text-cyanNeon text-sm"></i>
-                <select id="language-select" class="bg-slate-900/90 text-gold-400 text-xs sm:text-sm font-bold border border-gold-500/30 rounded-xl px-2 py-1 outline-none cursor-pointer hover:border-cyanNeon transition-colors">
-                    <option value="ar">العربية (Arabic)</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français (French)</option>
-                    <option value="es">Español (Spanish)</option>
-                    <option value="de">Deutsch (German)</option>
-                    <option value="zh">中文 (Chinese)</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
-                    <option value="ru">Русский (Russian)</option>
-                    <option value="ja">日本語 (Japanese)</option>
-                    <option value="it">Italiano (Italian)</option>
-                    <option value="sv">Svenska (Swedish)</option>
-                    <option value="tr">Türkçe (Turkish)</option>
-                    <option value="pt">Português (Portuguese)</option>
-                    <option value="fa">فارسی (Persian)</option>
-                </select>
-            </div>
-        </div>
+        // مصفوفة أيام الأسبوع باللغة العربية كالمطلوب تماماً
+        const daysOfWeekArabic = [
+            "الأحد",
+            "الإثنين",
+            "الثلاثاء",
+            "الأربعاء",
+            "الخميس",
+            "الجمعة",
+            "السبت"
+        ];
 
-        <!-- Background Ambient Elements -->
-        <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-            <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyanNeon/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl"></div>
-        </div>
+        // استخراج رقم اليوم (0 للأحد، 1 للإثنين... إلخ)
+        const dayIndex = selectedDate.getDay();
+        const dayNameArabic = daysOfWeekArabic[dayIndex];
 
-        <!-- Header: Academic Title & Name -->
-        <header class="z-10 text-center mt-1 mb-4 space-y-2">
-            <div id="researcher-title" class="inline-block px-4 py-1 rounded-full bg-slate-900/80 border border-gold-500/30 text-gold-400 text-xs md:text-sm tracking-wider shadow-lg">
-                <i class="fa-solid fa-square-root-variable ml-1"></i> الباحث في نظريات الأعداد وفي أحداث النهاية
-            </div>
-            <h1 id="researcher-name" class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-amber-500 neon-gold-text">
-                محمد بوحميدة
-            </h1>
-            <p class="text-xs sm:text-sm font-semibold text-cyanNeon tracking-widest uppercase font-orbitron">
-                Mohamed BOUHAMIDA
-            </p>
-            <div class="text-xs text-slate-400 flex items-center justify-center gap-1">
-                <i class="fa-solid fa-location-dot text-red-400"></i>
-                <span id="location-text">عين الصفراء &bull; ولاية النعامة &bull; الجزائر</span>
-            </div>
-        </header>
+        // تنسيق التاريخ المدخل لإظهاره بشكل رسمي للمستخدم
+        const formattedDate = selectedDate.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        <!-- Main Display Container -->
-        <main class="z-10 flex flex-col lg:flex-row items-center justify-center gap-8 my-auto w-full max-w-5xl">
-            
-            <!-- Analog Clock -->
-            <div class="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full glass-panel flex items-center justify-center border-2 border-gold-500/30 shadow-[0_0_50px_rgba(250,173,20,0.15)] flex-shrink-0">
-                
-                <!-- Outer Decorative Rings -->
-                <div class="absolute inset-2 rounded-full border border-dashed border-cyanNeon/30"></div>
-                <div class="absolute inset-4 rounded-full border border-slate-700"></div>
-                
-                <!-- Center Emblem -->
-                <div class="absolute text-center select-none pointer-events-none opacity-20 text-gold-400">
-                    <span class="text-4xl md:text-6xl font-serif">∑</span>
-                </div>
+        // عرض النتيجة النهائية بالصياغة الرسمية المتوافقة مع المظهر السابق
+        resultElement.className = "result";
+        resultElement.innerHTML = `التاريخ المدخل: <strong>${formattedDate}</strong> يوافق بدقة يوم: <span style="color: #38bdf8; font-weight: bold;">${dayNameArabic}</span>.`;
+    }
+</script>
 
-                <!-- Clock Dial Markers -->
-                <div id="dial-markers" class="absolute inset-0"></div>
-
-                <!-- Hands Container -->
-                <div class="relative w-full h-full">
-                    <!-- Hour Hand -->
-                    <div id="hour-hand" class="clock-hand absolute top-[25%] left-1/2 w-1.5 md:w-2 h-[25%] bg-gradient-to-t from-gold-500 to-amber-300 rounded-full z-30 -translate-x-1/2 shadow-[0_0_10px_rgba(250,173,20,0.8)]"></div>
-                    
-                    <!-- Minute Hand -->
-                    <div id="minute-hand" class="clock-hand absolute top-[15%] left-1/2 w-1 md:w-1.5 h-[35%] bg-gradient-to-t from-cyanNeon to-cyan-200 rounded-full z-40 -translate-x-1/2 shadow-[0_0_10px_rgba(0,243,255,0.8)]"></div>
-                    
-                    <!-- Second Hand -->
-                    <div id="second-hand" class="clock-hand absolute top-[10%] left-1/2 w-0.5 h-[40%] bg-red-500 rounded-full z-50 -translate-x-1/2 shadow-[0_0_8px_rgba(239,68,68,0.9)]"></div>
-                    
-                    <!-- Center Pin -->
-                    <div class="absolute top-1/2 left-1/2 w-4 h-4 bg-gold-400 rounded-full z-50 -translate-x-1/2 -translate-y-1/2 border-2 border-slate-900 shadow-md"></div>
-                </div>
-            </div>
-
-            <!-- Digital Display & Calendars -->
-            <div class="flex flex-col items-center justify-center space-y-4 w-full max-w-sm">
-                
-                <!-- Live Digital Clock Display -->
-                <div class="glass-panel px-8 py-6 rounded-3xl text-center border-gold-500/30 w-full shadow-lg">
-                    <div id="digital-clock" class="text-4xl sm:text-5xl md:text-6xl font-extrabold font-orbitron tracking-wider text-cyanNeon neon-cyan-text">
-                        00:00:00
-                    </div>
-                    <div id="digital-ampm" class="text-sm md:text-base font-semibold text-gold-400 mt-2 font-tajawal">
-                        --
-                    </div>
-                </div>
-
-                <!-- Three Calendars Display Card -->
-                <div class="glass-panel px-6 py-4 rounded-2xl w-full text-center space-y-3 border-gold-500/20">
-                    
-                    <!-- 1. Gregorian Date -->
-                    <div class="flex items-center justify-center space-x-2 space-x-reverse text-slate-200 text-sm md:text-base font-medium">
-                        <i class="fa-regular fa-calendar-days text-gold-400"></i>
-                        <span id="gregorian-date">-- ---- ----</span>
-                    </div>
-
-                    <!-- 2. Hijri Date -->
-                    <div class="flex items-center justify-center space-x-2 space-x-reverse text-gold-300 text-sm md:text-base font-bold font-amiri">
-                        <i class="fa-solid fa-moon text-cyanNeon"></i>
-                        <span id="hijri-date">-- ---- ----</span>
-                    </div>
-
-                    <!-- 3. Time Travel Calendar (Past Travel) -->
-                    <div class="pt-2 border-t border-slate-700/60 flex items-center justify-center space-x-2 space-x-reverse text-cyanNeon text-xs md:text-sm font-semibold">
-                        <i class="fa-solid fa-hourglass-half text-gold-400"></i>
-                        <span id="past-travel-date">--</span>
-                    </div>
-                </div>
-
-                <!-- Controls -->
-                <div class="flex items-center gap-3">
-                    <button id="toggle-format" class="px-5 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-gold-500/30 text-gold-400 text-xs md:text-sm font-bold transition-all shadow-md active:scale-95">
-                        نظام 12 / 24 ساعة
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Interactive Date Converter Tool -->
-        <section class="z-10 w-full max-w-4xl px-4 my-4">
-            <div class="glass-panel p-5 md:p-6 rounded-3xl border border-cyanNeon/30 relative overflow-hidden shadow-xl">
-                <div class="flex items-center justify-center gap-2 text-cyanNeon font-bold text-sm md:text-base mb-4">
-                    <i class="fa-solid fa-calculator text-gold-400"></i>
-                    <span id="converter-title">محول زمن الماضي التفاعلي</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Mode 1: Date to Millions of Years -->
-                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-gold-500/20 flex flex-col justify-between">
-                        <div>
-                            <label id="lbl-date-to-years" class="block text-xs md:text-sm font-semibold text-gold-300 mb-2">
-                                تحويل التاريخ إلى ملايين السنين (ابتداءً من 10 ماي 2010):
-                            </label>
-                            <input type="date" id="input-greg-date" min="2010-05-10" value="2026-11-07" class="w-full bg-slate-950 text-cyanNeon border border-cyanNeon/40 rounded-xl px-3 py-2 text-sm font-orbitron outline-none focus:border-gold-400 transition-colors">
-                        </div>
-                        <div class="mt-4 p-3 bg-slate-950/80 rounded-xl border border-cyanNeon/20 text-center">
-                            <span id="lbl-result-years" class="text-xs text-slate-400 block mb-1">النتيجة بملايين السنين:</span>
-                            <span id="result-years-val" class="text-base md:text-lg font-bold font-orbitron text-gold-400 neon-gold-text">6.025 مليون سنة</span>
-                        </div>
-                    </div>
-
-                    <!-- Mode 2: Millions of Years to Date -->
-                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-gold-500/20 flex flex-col justify-between">
-                        <div>
-                            <label id="lbl-years-to-date" class="block text-xs md:text-sm font-semibold text-cyanNeon mb-2">
-                                تحويل ملايين السنين إلى تاريخ (0.001 = يوم):
-                            </label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="input-years-num" step="0.001" value="6.025" class="w-full bg-slate-950 text-gold-400 border border-gold-500/40 rounded-xl px-3 py-2 text-sm font-orbitron outline-none focus:border-cyanNeon transition-colors" placeholder="مثال: 6.025">
-                                <span id="unit-million" class="text-xs text-slate-300 font-bold whitespace-nowrap">مليون سنة</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 p-3 bg-slate-950/80 rounded-xl border border-gold-500/20 text-center">
-                            <span id="lbl-result-date" class="text-xs text-slate-400 block mb-1">التاريخ الموافق:</span>
-                            <span id="result-date-val" class="text-base md:text-lg font-bold font-tajawal text-cyanNeon neon-cyan-text">07 نوفمبر 2026</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Researcher Theory Insight Box -->
-        <section class="z-10 w-full max-w-4xl px-4 my-4">
-            <div class="glass-panel p-4 md:p-6 rounded-3xl border border-gold-500/30 text-center relative overflow-hidden shadow-xl">
-                <div class="absolute -top-10 -right-10 w-24 h-24 bg-gold-500/10 rounded-full blur-xl pointer-events-none"></div>
-                <div class="flex items-center justify-center gap-2 text-gold-400 font-bold text-sm md:text-base mb-2">
-                    <i class="fa-solid fa-lightbulb text-cyanNeon"></i>
-                    <span id="theory-title">رؤية ونظرية الباحث</span>
-                </div>
-                <p id="theory-paragraph" class="text-xs md:text-sm text-slate-200 leading-relaxed font-tajawal text-justify md:text-center">
-                    يرى الباحث محمد بوحميدة أن سفر الأرض إلى محطات من ماضيها هو السبب الرئيسي والكبير لتغير المناخ الدولي (مع عدم إنكار أن للأنشطة البشرية دور في تغير المناخ لكنه ليس بالشيء الكبير جدا) أي أننا نشهد اليوم مناخا شبيها بالمناخ الذي كانت عليه الأرض قبل ملايين السنين، ويضيف الباحث أن هذا السفر إلى الماضي سيحفز وينشط ويقوي جهاز مناعة جسم الإنسان في قادم الأيام لجعله يتغلب على أمراض مستعصية والتي منها السرطان وأيضا ستتحسن حالة ذوي الاحتياجات الخاصة نتيجة هذه الاستدارة للزمان.
-                </p>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="z-10 text-center pb-2 mt-2">
-            <p id="footer-text" class="text-[10px] sm:text-xs text-slate-400 font-mono tracking-widest">
-                MOHAMED BOUHAMIDA RESEARCH CLOCK &bull; AIN SEFRA, ALGERIA
-            </p>
-        </footer>
-
-        <!-- Application Logic Script -->
-        <script>
-            let is24HourFormat = false;
-            let currentLang = 'ar';
-
-            // Translations Dictionary for 14 Languages
-            const i18n = {
-                ar: {
-                    dir: 'rtl',
-                    title: 'الباحث في نظريات الأعداد وفي أحداث النهاية',
-                    name: 'محمد بوحميدة',
-                    location: 'عين الصفراء • ولاية النعامة • الجزائر',
-                    formatBtn: 'نظام 12 / 24 ساعة',
-                    pm: 'مساءً (PM)',
-                    am: 'صباحاً (AM)',
-                    hours24: 'توقيت 24 ساعة',
-                    pastTravel: 'مليون سنة في الماضي',
-                    converterTitle: 'محول زمن الماضي التفاعلي',
-                    lblDateToYears: 'تحويل التاريخ إلى ملايين السنين (ابتداءً من 10 ماي 2010):',
-                    lblYearsToDate: 'تحويل ملايين السنين إلى تاريخ (0.001 = يوم):',
-                    unitMillion: 'مليون سنة',
-                    lblResultYears: 'النتيجة بملايين السنين في الماضي:',
-                    lblResultDate: 'التاريخ الموافق:',
-                    minDateError: 'التاريخ يجب أن يكون 10 ماي 2010 أو بعده',
-                    theoryTitle: 'رؤية ونظرية الباحث',
-                    theoryText: 'يرى الباحث محمد بوحميدة أن سفر الأرض إلى محطات من ماضيها هو السبب الرئيسي والكبير لتغير المناخ الدولي (مع عدم إنكار أن للأنشطة البشرية دور في تغير المناخ لكنه ليس بالشيء الكبير جدا) أي أننا نشهد اليوم مناخا شبيها بالمناخ الذي كانت عليه الأرض قبل ملايين السنين، ويضيف الباحث أن هذا السفر إلى الماضي سيحفز وينشط ويقوي جهاز مناعة جسم الإنسان في قادم الأيام لجعله يتغلب على أمراض مستعصية والتي منها السرطان وأيضا ستتحسن حالة ذوي الاحتياجات الخاصة نتيجة هذه الاستدارة للزمان.',
-                    footer: 'ساعة أبحاث محمد بوحميدة • عين الصفراء، الجزائر',
-                    locale: 'ar-DZ'
-                },
-                en: {
-                    dir: 'ltr',
-                    title: 'Researcher in Number Theory & End-Time Events',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Naama Province • Algeria',
-                    formatBtn: '12 / 24 Hour Format',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: '24-Hour Time',
-                    pastTravel: 'Million Years in the Past',
-                    converterTitle: 'Interactive Past Time Converter',
-                    lblDateToYears: 'Convert Date to Million Years (From May 10, 2010):',
-                    lblYearsToDate: 'Convert Million Years to Date (0.001 = 1 day):',
-                    unitMillion: 'Million Yrs',
-                    lblResultYears: 'Result in Million Years in Past:',
-                    lblResultDate: 'Corresponding Date:',
-                    minDateError: 'Date must be May 10, 2010 or later',
-                    theoryTitle: "Researcher's Vision & Theory",
-                    theoryText: 'Researcher Mohamed BOUHAMIDA posits that Earth’s journey into stages of its past is the primary and major cause of global climate change (without denying human activities play a role, though minor). Thus, today we experience a climate similar to millions of years ago. He adds that this time cycle will boost and strengthen the human immune system, overcoming incurable diseases such as cancer, while improving the condition of people with special needs as time turns.',
-                    footer: 'MOHAMED BOUHAMIDA RESEARCH CLOCK • AIN SEFRA, ALGERIA',
-                    locale: 'en-US'
-                },
-                fr: {
-                    dir: 'ltr',
-                    title: 'Chercheur en Théorie des Nombres & Événements de la Fin des Temps',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Aïn Séfra • Wilaya de Naâma • Algérie',
-                    formatBtn: 'Format 12 / 24H',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: 'Format 24 Heures',
-                    pastTravel: 'Millions d\'années dans le passé',
-                    converterTitle: 'Convertisseur Temporel du Passé Interactif',
-                    lblDateToYears: 'Convertir une date en millions d\'années (Dès le 10 mai 2010):',
-                    lblYearsToDate: 'Convertir des millions d\'années en date (0,001 = 1 jour):',
-                    unitMillion: 'Millions d\'années',
-                    lblResultYears: 'Résultat en millions d\'années dans le passé:',
-                    lblResultDate: 'Date correspondante:',
-                    minDateError: 'La date doit être à partir du 10 mai 2010',
-                    theoryTitle: "Vision et théorie du chercheur",
-                    theoryText: "Le chercheur Mohamed BOUHAMIDA estime que le voyage de la Terre vers son passé est la cause principale du changement climatique mondial (sans nier le rôle mineur de l'activité humaine). Nous connaissons ainsi un climat similaire à celui d'il y a des millions d'années. Il ajoute que ce retour dans le temps stimulera le système immunitaire humain pour vaincre des maladies incurables comme le cancer et améliorera l'état des personnes à besoins spécifiques.",
-                    footer: 'HORLOGE DE RECHERCHE MOHAMED BOUHAMIDA • AÏN SÉFRA, ALGÉRIE',
-                    locale: 'fr-FR'
-                },
-                es: {
-                    dir: 'ltr',
-                    title: 'Investigador en Teoría de Números y Eventos del Fin de los Tiempos',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Provincia de Naama • Argelia',
-                    formatBtn: 'Formato 12 / 24 Horas',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: 'Formato 24 Horas',
-                    pastTravel: 'Millones de Años en el Pasado',
-                    converterTitle: 'Convertidor Temporal del Pasado Interactivo',
-                    lblDateToYears: 'Convertir Fecha a Millones de Años (Desde 10 Mayo 2010):',
-                    lblYearsToDate: 'Convertir Millones de Años a Fecha (0.001 = 1 día):',
-                    unitMillion: 'Millones de Años',
-                    lblResultYears: 'Resultado en Millones de Años en el Pasado:',
-                    lblResultDate: 'Fecha Correspondiente:',
-                    minDateError: 'La fecha debe ser a partir del 10 de mayo de 2010',
-                    theoryTitle: 'Visión y Teoría del Investigador',
-                    theoryText: 'El investigador Mohamed BOUHAMIDA sostiene que el viaje de la Tierra a etapas de su pasado es la causa principal del cambio climático global (sin negar un rol menor de la actividad humana). Así, presenciamos un clima similar al de hace millones de años. Agrega que este ciclo temporal fortalecerá el sistema inmunológico humano para superar enfermedades incurables como el cáncer y mejorará la condición de las personas con necesidades especiales.',
-                    footer: 'RELOJ DE INVESTIGACIÓN MOHAMED BOUHAMIDA • AIN SEFRA, ARGELIA',
-                    locale: 'es-ES'
-                },
-                de: {
-                    dir: 'ltr',
-                    title: 'Forscher für Zahlentheorie & Endzeit-Ereignisse',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Provinz Naama • Algerien',
-                    formatBtn: '12 / 24 Stunden Format',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: '24-Stunden-Format',
-                    pastTravel: 'Millionen Jahre in der Vergangenheit',
-                    converterTitle: 'Interaktiver Vergangenheits-Zeitrechner',
-                    lblDateToYears: 'Datum in Millionen Jahre umrechnen (Ab 10. Mai 2010):',
-                    lblYearsToDate: 'Millionen Jahre in Datum umrechnen (0,001 = 1 Tag):',
-                    unitMillion: 'Mio. Jahre',
-                    lblResultYears: 'Ergebnis in Millionen Jahren in Vergangenheit:',
-                    lblResultDate: 'Entsprechendes Datum:',
-                    minDateError: 'Datum muss ab dem 10. Mai 2010 sein',
-                    theoryTitle: 'Vision und Theorie des Forschers',
-                    theoryText: 'Der Forscher Mohamed BOUHAMIDA vertritt die Auffassung, dass die Reise der Erde in Stationen ihrer Vergangenheit die Hauptursache für den globalen Klimawandel ist. Wir erleben heute ein Klima wie vor Millionen von Jahren. Er fügt hinzu, dass dieser Zeitkreislauf das menschliche Immunsystem stärken wird, um unheilbare Krankheiten wie Krebs zu besiegen und die Lebensqualität von Menschen mit besonderen Bedürfnissen zu verbessern.',
-                    footer: 'FORSCHUNGSUHR MOHAMED BOUHAMIDA • AIN SEFRA, ALGERIEN',
-                    locale: 'de-DE'
-                },
-                zh: {
-                    dir: 'ltr',
-                    title: '数论与末世事件研究员',
-                    name: 'Mohamed BOUHAMIDA (穆罕默德·布哈米达)',
-                    location: '阿恩塞夫拉 • 纳马省 • 阿尔及利亚',
-                    formatBtn: '12 / 24 小时制',
-                    pm: '下午 (PM)',
-                    am: '上午 (AM)',
-                    hours24: '24小时制',
-                    pastTravel: '百万年前',
-                    converterTitle: '互动过去时间转换器',
-                    lblDateToYears: '将日期转换为百万年（从2010年5月10日起）：',
-                    lblYearsToDate: '将百万年转换为日期（0.001 = 1天）：',
-                    unitMillion: '百万年',
-                    lblResultYears: '过去百万年计算结果：',
-                    lblResultDate: '对应日期：',
-                    minDateError: '日期必须为2010年5月10日或之后',
-                    theoryTitle: '研究员的理论与构想',
-                    theoryText: '研究员穆罕默德·布哈米达认为，地球走向其过去的各个阶段是全球气候变化的主要原因（不否认人类活动有微小影响）。今天我们所经历的气候类似于数百万年前的气候。他补充说，这种时间的重塑将增强人体免疫系统，克服包括癌症在内的顽疾，并改善特殊需求人群的状况。',
-                    footer: 'MOHAMED BOUHAMIDA 研究时钟 • 阿尔及利亚阿恩塞夫拉',
-                    locale: 'zh-CN'
-                },
-                hi: {
-                    dir: 'ltr',
-                    title: 'संख्या सिद्धांत और अंत समय की घटनाओं के शोधकर्ता',
-                    name: 'Mohamed BOUHAMIDA (मोहम्मद बोहमिला)',
-                    location: 'ऐन सेफरा • नामा प्रांत • अल्जीरिया',
-                    formatBtn: '12 / 24 घंटे का प्रारूप',
-                    pm: 'अपराह्न (PM)',
-                    am: 'पूर्वाह्न (AM)',
-                    hours24: '24-घंटे का प्रारूप',
-                    pastTravel: 'दस लाख साल अतीत में',
-                    converterTitle: 'इंटरएक्टिव अतीत समय परिवर्तक',
-                    lblDateToYears: 'तिथि को 10 लाख वर्षों में बदलें (10 मई 2010 से):',
-                    lblYearsToDate: '10 लाख वर्षों को तिथि में बदलें (0.001 = 1 दिन):',
-                    unitMillion: 'दस लाख वर्ष',
-                    lblResultYears: 'अतीत में दस लाख वर्षों में परिणाम:',
-                    lblResultDate: 'तदनुरूपी तिथि:',
-                    minDateError: 'तिथि 10 मई 2010 या उसके बाद की होनी चाहिए',
-                    theoryTitle: 'शोधकर्ता की दृष्टि और सिद्धांत',
-                    theoryText: 'शोधकर्ता मोहम्मद बोहमिला का मानना ​​है कि पृथ्वी की इसके अतीत के चरणों की यात्रा वैश्विक जलवायु परिवर्तन का मुख्य कारण है (मानव गतिविधियों की मामूली भूमिका से इंकार किए बिना)। हम लाखों साल पहले की जलवायु देख रहे हैं। उन्होंने आगे कहा कि समय का यह चक्र मानव प्रतिरक्षा प्रणाली को मजबूत करेगा, जिससे कैंसर जैसी बीमारियों पर विजय प्राप्त होगी और विशेष आवश्यकताओं वाले लोगों की स्थिति में सुधार होगा।',
-                    footer: 'मोहम्मद बोहमिला अनुसंधान घड़ी • ऐन सेफरा, अल्जीरिया',
-                    locale: 'hi-IN'
-                },
-                ru: {
-                    dir: 'ltr',
-                    title: 'Исследователь теории чисел и событий конца времен',
-                    name: 'Mohamed BOUHAMIDA (Мохамед Бухамида)',
-                    location: 'Айн-Сефра • Провинция Наама • Алжир',
-                    formatBtn: 'Формат 12 / 24 часа',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: '24-часовой формат',
-                    pastTravel: 'миллионов лет в прошлом',
-                    converterTitle: 'Интерактивный конвертер времени прошлого',
-                    lblDateToYears: 'Перевод даты в миллионы лет (с 10 мая 2010 года):',
-                    lblYearsToDate: 'Перевод миллионов лет в дату (0.001 = 1 день):',
-                    unitMillion: 'млн лет',
-                    lblResultYears: 'Результат в миллионах лет в прошлом:',
-                    lblResultDate: 'Соответствующая дата:',
-                    minDateError: 'Дата должна быть не ранее 10 мая 2010 года',
-                    theoryTitle: 'Взгляд и теория исследователя',
-                    theoryText: 'Исследователь Мохамед Бухамида считает, что путешествие Земли в этапы её прошлого является главной причиной глобального изменения климата. Сегодня мы наблюдаем климат, похожий на тот, что был миллионы лет назад. Он добавляет, что этот циклический поворот времени активизирует иммунную систему человека для победы над неизлечимыми болезнями, включая рак, и улучшит состояние людей с ограниченными возможностями.',
-                    footer: 'ИССЛЕДОВАТЕЛЬСКИЕ ЧАСЫ МОХАМЕДА БУХАМИДЫ • АЙН-СЕФРА, АЛЖИР',
-                    locale: 'ru-RU'
-                },
-                ja: {
-                    dir: 'ltr',
-                    title: '数論および終末事象の研究者',
-                    name: 'Mohamed BOUHAMIDA (モハメド・ブーハミダ)',
-                    location: 'アインセフラ • 拿马省 • アルジェリア',
-                    formatBtn: '12 / 24 時間表示',
-                    pm: '午後 (PM)',
-                    am: '午前 (AM)',
-                    hours24: '24時間 modal',
-                    pastTravel: '百万年前',
-                    converterTitle: 'インタラクティブ過去時間コンバーター',
-                    lblDateToYears: '日付を百万年に変換（2010年5月10日以降）：',
-                    lblYearsToDate: '百万年を日付に変換（0.001 = 1日）：',
-                    unitMillion: '百万年',
-                    lblResultYears: '過去の百万年計算結果：',
-                    lblResultDate: '対応する日付：',
-                    minDateError: '日付は2010年5月10日以降である必要があります',
-                    theoryTitle: '研究者のビジョンと理論',
-                    theoryText: '研究者モハメド・ブーハミダ氏は、地球が過去の段階へ巡ることが世界的な気候変動の主要な原因であると考えています。今日私たちが経験している気候は数百万年前のものと似ています。時間の反転により人間の免疫系が活性化され、がんなどの難病を克服し、特別なニーズを持つ人々の状態も改善されると述べています。',
-                    footer: 'MOHAMED BOUHAMIDA 研究時計 • アルジェリア・アインセフラ',
-                    locale: 'ja-JP'
-                },
-                it: {
-                    dir: 'ltr',
-                    title: 'Ricercatore in Teoria dei Numeri ed Eventi della Fine dei Tempi',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Provincia di Naama • Algeria',
-                    formatBtn: 'Formato 12 / 24 Ore',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: 'Formato 24 Ore',
-                    pastTravel: 'Milioni di Anni nel Passato',
-                    converterTitle: 'Convertitore Temporale del Passato Interattivo',
-                    lblDateToYears: 'Converti data in milioni di anni (Dal 10 maggio 2010):',
-                    lblYearsToDate: 'Converti milioni di anni in data (0.001 = 1 giorno):',
-                    unitMillion: 'Milioni di anni',
-                    lblResultYears: 'Risultato in milioni di anni nel passato:',
-                    lblResultDate: 'Data corrispondente:',
-                    minDateError: 'La data deve essere dal 10 maggio 2010 in poi',
-                    theoryTitle: 'Visione e Teoria del Ricercatore',
-                    theoryText: 'Il ricercatore Mohamed BOUHAMIDA ritiene che il viaggio della Terra verso fasi del suo passato sia la causa principale del cambiamento climatico globale. Oggi assistiamo a un clima simile a quello di milioni di anni fa. Aggiunge che questo ciclo temporale stimolerà il sistema immunitario umano per superare malattie incurabili come il cancro e migliorerà la condizione delle persone con esigenze speciali.',
-                    footer: 'OROLOGIO DI RICERCA MOHAMED BOUHAMIDA • AIN SEFRA, ALGERIA',
-                    locale: 'it-IT'
-                },
-                sv: {
-                    dir: 'ltr',
-                    title: 'Forskare i talteori & sluttidshändelser',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Naama-provinsen • Algeriet',
-                    formatBtn: '12 / 24-timmarsformat',
-                    pm: 'E.M.',
-                    am: 'F.M.',
-                    hours24: '24-timmarsvisning',
-                    pastTravel: 'Miljoner år i det förflutna',
-                    converterTitle: 'Interaktiv förfluten tid-omvandlare',
-                    lblDateToYears: 'Omvandla datum till miljoner år (Från 10 maj 2010):',
-                    lblYearsToDate: 'Omvandla miljoner år till datum (0.001 = 1 dag):',
-                    unitMillion: 'Miljoner år',
-                    lblResultYears: 'Resultat i miljoner år i det förflutna:',
-                    lblResultDate: 'Motsvarande datum:',
-                    minDateError: 'Datum måste vara från 10 maj 2010 eller senare',
-                    theoryTitle: 'Forskarens vision och teori',
-                    theoryText: 'Forskaren Mohamed BOUHAMIDA anser att jordens resa till stadier av sitt förflutna är den främsta orsaken till den globala klimatförändringen. Vi upplever idag ett klimat som liknar det för miljoner år sedan. Han tillägger att denna tidscykel kommer att stärka det mänskliga immunsystemet för att övervinna obotliga sjukdomar som cancer och förbättra tillståndet för personer med särskilda behov.',
-                    footer: 'MOHAMED BOUHAMIDA FORSKNINGSUR • AIN SEFRA, ALGERIET',
-                    locale: 'sv-SE'
-                },
-                tr: {
-                    dir: 'ltr',
-                    title: 'Sayılar Teorisi ve Ahir Zaman Olayları Araştırmacısı',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ayn Sefra • Naama Vilayeti • Cezayir',
-                    formatBtn: '12 / 24 Saat Formatı',
-                    pm: 'Ö.S.',
-                    am: 'Ö.Ö.',
-                    hours24: '24-Saat Formatı',
-                    pastTravel: 'Milyon Yıl Geçmişte',
-                    converterTitle: 'Etkileşimli Geçmiş Zaman Dönüştürücüsü',
-                    lblDateToYears: 'Tarihi Milyon Yıla Dönüştür (10 Mayıs 2010\'dan itibaren):',
-                    lblYearsToDate: 'Milyon Yılı Tarihe Dönüştür (0.001 = 1 gün):',
-                    unitMillion: 'Milyon Yıl',
-                    lblResultYears: 'Geçmişteki Milyon Yıl Sonucu:',
-                    lblResultDate: 'Karşılık Gelen Tarih:',
-                    minDateError: 'Tarih 10 Mayıs 2010 veya sonrası olmalıdır',
-                    theoryTitle: 'Araştırmacının Görüşü ve Teorisi',
-                    theoryText: 'Araştırmacı Mohamed BOUHAMIDA, Dünya\'nın geçmişine doğru yolculuğunun küresel iklim değişikliğinin ana nedeni olduğuna inanmaktadır. Bugün milyonlarca yıl önceki iklime benzer bir iklime tanıklık ediyoruz. Zamanın bu dönüşünün, insan bağışıklık sistemini güçlendirerek kanser gibi amansız hastalıkların üstesinden geleceğini ve özel gereksinimli bireylerin durumunu iyileştireceğini ekliyor.',
-                    footer: 'MOHAMED BOUHAMIDA ARAŞTIRMA SAATİ • AYN SEFRA, CEZAYİR',
-                    locale: 'tr-TR'
-                },
-                pt: {
-                    dir: 'ltr',
-                    title: 'Pesquisador em Teoria dos Números e Eventos do Fim dos Tempos',
-                    name: 'Mohamed BOUHAMIDA',
-                    location: 'Ain Sefra • Província de Naama • Argélia',
-                    formatBtn: 'Formato 12 / 24 Horas',
-                    pm: 'PM',
-                    am: 'AM',
-                    hours24: 'Formato 24 Horas',
-                    pastTravel: 'Milhões de Anos no Passado',
-                    converterTitle: 'Conversor Interativo de Tempo do Passado',
-                    lblDateToYears: 'Converter data em milhões de anos (A partir de 10 maio 2010):',
-                    lblYearsToDate: 'Converter milhões de anos em data (0.001 = 1 dia):',
-                    unitMillion: 'Milhões de Anos',
-                    lblResultYears: 'Resultado em milhões de anos no passado:',
-                    lblResultDate: 'Data correspondente:',
-                    minDateError: 'A data deve ser a partir de 10 de maio de 2010',
-                    theoryTitle: 'Visão e Teoria do Pesquisador',
-                    theoryText: 'O pesquisador Mohamed BOUHAMIDA defende que a viagem da Terra a estágios do seu passado é a causa principal da mudança climática global. Hoje testemunhamos um clima semelhante ao de milhões de anos atrás. Ele acrescenta que esse ciclo temporal fortalecerá o sistema imunológico humano para combater doenças incuráveis como o câncer e melhorará a condição de pessoas com necessidades especiais.',
-                    footer: 'RELÓGIO DE PESQUISA MOHAMED BOUHAMIDA • AIN SEFRA, ARGÉLIA',
-                    locale: 'pt-PT'
-                },
-                fa: {
-                    dir: 'rtl',
-                    title: 'پژوهشگر نظریه اعداد و رویدادهای آخرالزمان',
-                    name: 'محمد بوحمیده',
-                    location: 'عین الصفراء • استان النعامه • الجزایر',
-                    formatBtn: 'فرمت ۱۲ / ۲۴ ساعته',
-                    pm: 'عصر (PM)',
-                    am: 'صبح (AM)',
-                    hours24: 'زمان ۲۴ ساعته',
-                    pastTravel: 'میلیون سال در گذشته',
-                    converterTitle: 'مبدل تعاملی زمان گذشته',
-                    lblDateToYears: 'تبدیل تاریخ به میلیون سال (از ۱۰ مه ۲۰۱۰ به بعد):',
-                    lblYearsToDate: 'تبدیل میلیون سال به تاریخ (۰.۰۰۱ = ۱ روز):',
-                    unitMillion: 'میلیون سال',
-                    lblResultYears: 'نتیجه به میلیون سال در گذشته:',
-                    lblResultDate: 'تاریخ مربوطه:',
-                    minDateError: 'تاریخ باید ۱۰ مه ۲۰۱۰ یا بعد از آن باشد',
-                    theoryTitle: 'دیدگاه و نظریه پژوهشگر',
-                    theoryText: 'پژوهشگر محمد بوحمیده معتقد است که سفر زمین به ایستگاه‌هایی از گذشته خود، علت اصلی تغییرات اقلیمی جهانی است (بدون انکار نقش جزئی فعالیت‌های انسانی). ما امروزه شاهد آب‌وهوایی شبیه به میلیون‌ها سال پیش هستیم. او می‌افزاید که این چرخش زمان، سیستم ایمنی بدن انسان را تقویت کرده تا بر بیماری‌های صعب‌العلاج مانند سرطان غلبه کند و وضعیت افراد دارای معلولیت نیز بهبود یابد.',
-                    footer: 'ساعت پژوهشی محمد بوحمیده • عین الصفراء، الجزایر',
-                    locale: 'fa-IR'
-                }
-            };
-
-            // Generate Clock Markers/Numbers
-            function generateDial() {
-                const dial = document.getElementById('dial-markers');
-                if (!dial) return;
-                dial.innerHTML = '';
-                const mathSymbols = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
-                
-                const radius = 41;
-                for (let i = 0; i < 12; i++) {
-                    const angle = (i * 30 - 90) * (Math.PI / 180);
-                    const x = 50 + radius * Math.cos(angle);
-                    const y = 50 + radius * Math.sin(angle);
-
-                    const marker = document.createElement('div');
-                    marker.className = 'absolute transform -translate-x-1/2 -translate-y-1/2 text-gold-400 font-bold font-orbitron text-xs sm:text-sm md:text-base select-none';
-                    marker.style.left = `${x}%`;
-                    marker.style.top = `${y}%`;
-                    marker.innerText = mathSymbols[i];
-                    dial.appendChild(marker);
-                }
-            }
-
-            // Calculate Past Travel Millions of Years (07 Nov 2026 = 6.025 M Years)
-            function calculatePastTravel(now) {
-                const refDate = new Date(2026, 10, 7);
-                const currentDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const refDateOnly = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
-                
-                const diffTime = currentDateOnly - refDateOnly;
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-                
-                const val = 6.025 + (diffDays * 0.001);
-                const langConfig = i18n[currentLang] || i18n.ar;
-                return `${val.toFixed(3)} ${langConfig.pastTravel}`;
-            }
-
-            // Helper to update HTML element text safely
-            function setElementText(id, text) {
-                const el = document.getElementById(id);
-                if (el) el.innerText = text;
-            }
-
-            // Update UI based on selected language
-            function applyLanguage(lang) {
-                currentLang = lang;
-                const config = i18n[lang] || i18n.ar;
-
-                document.documentElement.dir = config.dir;
-                
-                // Update Static Texts
-                const titleEl = document.getElementById('researcher-title');
-                if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-square-root-variable ${config.dir === 'rtl' ? 'ml-1' : 'mr-1'}"></i> ${config.title}`;
-                
-                setElementText('researcher-name', config.name);
-                
-                const locEl = document.getElementById('location-text');
-                if (locEl) locEl.innerText = config.location;
-
-                setElementText('toggle-format', config.formatBtn);
-                setElementText('converter-title', config.converterTitle);
-                setElementText('lbl-date-to-years', config.lblDateToYears);
-                setElementText('lbl-years-to-date', config.lblYearsToDate);
-                setElementText('unit-million', config.unitMillion);
-                setElementText('lbl-result-years', config.lblResultYears);
-                setElementText('lbl-result-date', config.lblResultDate);
-                setElementText('theory-title', config.theoryTitle);
-                setElementText('theory-paragraph', config.theoryText);
-                setElementText('footer-text', config.footer);
-
-                // Refresh converter calculation text with language context
-                calculateDateToYears();
-                calculateYearsToDate();
-
-                updateClock();
-            }
-
-            // Converter Calculation Logic
-            const REF_DATE = new Date(2026, 10, 7); // 07 Nov 2026
-            const MIN_DATE = new Date(2010, 4, 10);  // 10 May 2010
-            const REF_YEARS = 6.025;
-
-            function calculateDateToYears() {
-                const dateInput = document.getElementById('input-greg-date');
-                const resultVal = document.getElementById('result-years-val');
-                if (!dateInput || !resultVal) return;
-
-                const config = i18n[currentLang] || i18n.ar;
-                if (!dateInput.value) return;
-
-                const selectedDate = new Date(dateInput.value + 'T00:00:00');
-                
-                if (selectedDate < MIN_DATE) {
-                    resultVal.innerText = config.minDateError;
-                    resultVal.classList.remove('text-gold-400');
-                    resultVal.classList.add('text-red-400');
-                    return;
-                }
-
-                resultVal.classList.remove('text-red-400');
-                resultVal.classList.add('text-gold-400');
-
-                const diffTime = selectedDate - REF_DATE;
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-                const yearsInPast = REF_YEARS + (diffDays * 0.001);
-
-                resultVal.innerText = `${yearsInPast.toFixed(3)} ${config.pastTravel}`;
-            }
-
-            function calculateYearsToDate() {
-                const yearsInput = document.getElementById('input-years-num');
-                const resultVal = document.getElementById('result-date-val');
-                if (!yearsInput || !resultVal) return;
-
-                const config = i18n[currentLang] || i18n.ar;
-                const val = parseFloat(yearsInput.value);
-
-                if (isNaN(val)) {
-                    resultVal.innerText = '--';
-                    return;
-                }
-
-                const diffDays = Math.round((val - REF_YEARS) / 0.001);
-                const targetDate = new Date(REF_DATE);
-                targetDate.setDate(targetDate.getDate() + diffDays);
-
-                if (targetDate < MIN_DATE) {
-                    resultVal.innerText = config.minDateError;
-                    resultVal.classList.remove('text-cyanNeon');
-                    resultVal.classList.add('text-red-400');
-                    return;
-                }
-
-                resultVal.classList.remove('text-red-400');
-                resultVal.classList.add('text-cyanNeon');
-
-                try {
-                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    resultVal.innerText = targetDate.toLocaleDateString(config.locale, options);
-                } catch (e) {
-                    resultVal.innerText = targetDate.toISOString().split('T')[0];
-                }
-            }
-
-            // Core Clock Engine Update Loop
-            function updateClock() {
-                const now = new Date();
-                const config = i18n[currentLang] || i18n.ar;
-
-                // 1. Analog Hands Rotation Calculation
-                const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
-                const minutes = now.getMinutes() + seconds / 60;
-                const hours = (now.getHours() % 12) + minutes / 60;
-
-                const secondDeg = seconds * 6;
-                const minuteDeg = minutes * 6;
-                const hourDeg = hours * 30;
-
-                const secondHand = document.getElementById('second-hand');
-                const minuteHand = document.getElementById('minute-hand');
-                const hourHand = document.getElementById('hour-hand');
-
-                if (secondHand) secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
-                if (minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
-                if (hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
-
-                // 2. Digital Clock Display Calculation
-                let h = now.getHours();
-                const m = String(now.getMinutes()).padStart(2, '0');
-                const s = String(now.getSeconds()).padStart(2, '0');
-                let ampm = '';
-
-                if (!is24HourFormat) {
-                    ampm = h >= 12 ? config.pm : config.am;
-                    h = h % 12 || 12;
-                } else {
-                    ampm = config.hours24;
-                }
-
-                const displayHours = String(h).padStart(2, '0');
-                setElementText('digital-clock', `${displayHours}:${m}:${s}`);
-                setElementText('digital-ampm', ampm);
-
-                // 3. Gregorian Date Display
-                try {
-                    const gregOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    setElementText('gregorian-date', now.toLocaleDateString(config.locale, gregOptions));
-                } catch (e) {
-                    setElementText('gregorian-date', now.toDateString());
-                }
-
-                // 4. Hijri Date Display
-                try {
-                    const hijriOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-                    let hijriLocale = config.locale + '-u-ca-islamic-umalqura';
-                    if (currentLang === 'fa') hijriLocale = 'fa-IR-u-ca-islamic-civil';
-                    
-                    setElementText('hijri-date', new Intl.DateTimeFormat(hijriLocale, hijriOptions).format(now));
-                } catch (e) {
-                    try {
-                        setElementText('hijri-date', new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { year: 'numeric', month: 'long', day: 'numeric' }).format(now));
-                    } catch (err) {
-                        setElementText('hijri-date', 'Hijri Calendar');
-                    }
-                }
-
-                // 5. Time Travel Calendar Display
-                setElementText('past-travel-date', calculatePastTravel(now));
-            }
-
-            // Initialize Application
-            function initClockApp() {
-                generateDial();
-                applyLanguage('ar');
-                setInterval(updateClock, 50);
-
-                const toggleBtn = document.getElementById('toggle-format');
-                if (toggleBtn) {
-                    toggleBtn.onclick = function() {
-                        is24HourFormat = !is24HourFormat;
-                        updateClock();
-                    };
-                }
-
-                const langSelect = document.getElementById('language-select');
-                if (langSelect) {
-                    langSelect.onchange = function(e) {
-                        applyLanguage(e.target.value);
-                    };
-                }
-
-                // Converter Event Listeners
-                const inputDate = document.getElementById('input-greg-date');
-                if (inputDate) inputDate.addEventListener('input', calculateDateToYears);
-
-                const inputYears = document.getElementById('input-years-num');
-                if (inputYears) inputYears.addEventListener('input', calculateYearsToDate);
-            }
-
-            // Safe Execution Handling
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initClockApp);
-            } else {
-                initClockApp();
-            }
-        </script>
-    </body>
+</body>
 </html>
