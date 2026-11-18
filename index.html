@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة تحديد أيام الأسبوع الكونية</title>
+    <title>حاسبة تحديد أيام الأسبوع الكونية الفورية</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,7 +47,7 @@
             font-size: 0.95rem;
             color: #f43f5e;
         }
-        input, button {
+        input {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -58,18 +58,6 @@
             box-sizing: border-box;
             font-size: 1rem;
             text-align: center;
-        }
-        button {
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.05rem;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #0369a1;
         }
         .result {
             margin-top: 15px;
@@ -99,66 +87,84 @@
 <body>
 
 <div class="container">
-    <h2>حاسبة تحديد يوم الأسبوع التاريخي</h2>
+    <h2>حاسبة تحديد يوم الأسبوع الفورية</h2>
     
     <div class="section">
         <label for="targetDate">الرجاء إدخال التاريخ المراد معرفة يومه:</label>
-        <!-- تحديد الحد الأدنى للتقويم من تاريخ 1500-01-01 -->
-        <input type="date" id="targetDate" min="1500-01-01">
+        <!-- الحد الأدنى للتقويم من تاريخ 0500-01-01 -->
+        <input type="date" id="targetDate" min="0500-01-01">
         
-        <button onclick="findDayOfWeek()">ابحث عن اليوم الموافِق</button>
-        
-        <div class="result" id="calcResult">بانتظار اختيار التاريخ وضغط زر البحث...</div>
+        <div class="result" id="calcResult">بانتظار اختيار التاريخ...</div>
     </div>
 
-    <div class="note">نطاق عمل الحاسبة: من 01 يناير 1500 ميلادية فصاعداً</div>
+    <div class="note">نطاق عمل الحاسبة: من 01 يناير 500 ميلادية فصاعداً</div>
 </div>
 
 <script>
-    function findDayOfWeek() {
+    document.addEventListener('DOMContentLoaded', function() {
         const inputElement = document.getElementById('targetDate');
         const resultElement = document.getElementById('calcResult');
-        
-        // التحقق من وجود إدخال
-        if (!inputElement.value) {
-            resultElement.className = "result error";
-            resultElement.innerHTML = "⚠️ خطأ: يرجى اختيار تاريخ صالح أولاً.";
-            return;
+
+        function findDayOfWeek() {
+            // إذا قام المستخدم بمسح الحقل أو عدم اختيار تاريخ
+            if (!inputElement.value) {
+                resultElement.className = "result";
+                resultElement.innerHTML = "بانتظار اختيار التاريخ...";
+                return;
+            }
+
+            // تقسيم التاريخ لتجنب مشاكل فروق التوقيت (UTC)
+            const parts = inputElement.value.split('-');
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+
+            // التحقق من اكتمال إدخال السنة المكونة من 3 أو 4 أرقام
+            if (isNaN(year) || isNaN(month) || isNaN(day) || parts[0].length < 4) {
+                return;
+            }
+
+            const selectedDate = new Date(year, month, day);
+            selectedDate.setFullYear(year);
+
+            const limitDate = new Date(500, 0, 1);
+            limitDate.setFullYear(500);
+
+            // جدار الحماية التاريخي لمنع ما قبل عام 500
+            if (selectedDate < limitDate || year < 500) {
+                resultElement.className = "result error";
+                resultElement.innerHTML = "⚠️ خطأ: الحساب غير ممكن! التاريخ المدخل يقع قبل الحد المسموح به (01 يناير 500 ميلادية).";
+                return;
+            }
+
+            // مصفوفة أيام الأسبوع باللغة العربية
+            const daysOfWeekArabic = [
+                "الأحد",
+                "الإثنين",
+                "الثلاثاء",
+                "الأربعاء",
+                "الخميس",
+                "الجمعة",
+                "السبت"
+            ];
+
+            const dayIndex = selectedDate.getDay();
+            const dayNameArabic = daysOfWeekArabic[dayIndex];
+
+            const formattedDate = selectedDate.toLocaleDateString('ar-DZ', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            resultElement.className = "result";
+            resultElement.innerHTML = `التاريخ المدخل: <strong>${formattedDate}</strong> يوافق بدقة يوم: <span style="color: #38bdf8; font-weight: bold;">${dayNameArabic}</span>.`;
         }
 
-        const selectedDate = new Date(inputElement.value);
-        // حد الأمان الأدنى (1 يناير 1500)
-        const limitDate = new Date(1500, 0, 1); 
-
-        // جدار الحماية التاريخي لمنع ما قبل عام 1500
-        if (selectedDate < limitDate) {
-            resultElement.className = "result error";
-            resultElement.innerHTML = "⚠️ خطأ: الحساب مستحيل وغير ممكن! التاريخ المدخل يقع قبل الحد المسموح به للآلة (01 يناير 1500 ميلادية).";
-            return;
-        }
-
-        // مصفوفة أيام الأسبوع باللغة العربية كالمطلوب تماماً
-        const daysOfWeekArabic = [
-            "الأحد",
-            "الإثنين",
-            "الثلاثاء",
-            "الأربعاء",
-            "الخميس",
-            "الجمعة",
-            "السبت"
-        ];
-
-        // استخراج رقم اليوم (0 للأحد، 1 للإثنين... إلخ)
-        const dayIndex = selectedDate.getDay();
-        const dayNameArabic = daysOfWeekArabic[dayIndex];
-
-        // تنسيق التاريخ المدخل لإظهاره بشكل رسمي للمستخدم
-        const formattedDate = selectedDate.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
-
-        // عرض النتيجة النهائية بالصياغة الرسمية المتوافقة مع المظهر السابق
-        resultElement.className = "result";
-        resultElement.innerHTML = `التاريخ المدخل: <strong>${formattedDate}</strong> يوافق بدقة يوم: <span style="color: #38bdf8; font-weight: bold;">${dayNameArabic}</span>.`;
-    }
+        // الاستماع لحدث التغيير ليتم الحساب فوراً عند اختيار التاريخ
+        inputElement.addEventListener('input', findDayOfWeek);
+        inputElement.addEventListener('change', findDayOfWeek);
+    });
 </script>
 
 </body>
